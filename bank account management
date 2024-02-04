@@ -1,0 +1,157 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class BankAccount {
+private:
+    string accountNumber;
+    string accountHolderName;
+    double balance;
+
+public:
+    // Constructor
+    BankAccount(string accNum, string accHolderName, double initialBalance) {
+        accountNumber = accNum;
+        accountHolderName = accHolderName;
+        balance = initialBalance;
+    }
+
+    // Deposit money
+    void deposit(double amount) {
+        balance += amount;
+        cout << "Amount deposited successfully. Updated balance: " << balance << endl;
+    }
+
+    // Withdraw money
+    bool withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            cout << "Amount withdrawn successfully. Updated balance: " << balance << endl;
+            return true;
+        } else {
+            cout << "Insufficient balance!" << endl;
+            return false;
+        }
+    }
+
+    // Get account number
+    string getAccountNumber() {
+        return accountNumber;
+    }
+
+    // Display account details
+    void display() {
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Account Holder Name: " << accountHolderName << endl;
+        cout << "Balance: " << balance << endl;
+    }
+};
+
+class Bank {
+private:
+    vector<BankAccount*> accounts;
+
+public:
+    // Destructor
+    ~Bank() {
+        for (BankAccount* acc : accounts) {
+            delete acc;
+        }
+    }
+
+    // Create a new account
+    void createAccount() {
+        string accNum, accHolderName;
+        double initialBalance;
+
+        cout << "Enter Account Number: ";
+        cin >> accNum;
+        cout << "Enter Account Holder Name: ";
+        cin >> accHolderName;
+        cout << "Enter Initial Balance: ";
+        cin >> initialBalance;
+
+        accounts.push_back(new BankAccount(accNum, accHolderName, initialBalance));
+        cout << "Account created successfully." << endl;
+    }
+
+    // Find account by account number
+    BankAccount* findAccount(string accNum) {
+        for (BankAccount* acc : accounts) {
+            if (acc->getAccountNumber() == accNum) {
+                return acc;
+            }
+        }
+        return nullptr;
+    }
+
+    // Transfer funds between accounts
+    void transferFunds(string fromAccNum, string toAccNum, double amount) {
+        BankAccount* fromAccount = findAccount(fromAccNum);
+        BankAccount* toAccount = findAccount(toAccNum);
+        if (fromAccount && toAccount) {
+            if (fromAccount->withdraw(amount)) {
+                toAccount->deposit(amount);
+                cout << "Funds transferred successfully." << endl;
+            } else {
+                cout << "Transfer failed. Insufficient balance in the source account." << endl;
+            }
+        } else {
+            cout << "One or both accounts not found." << endl;
+        }
+    }
+
+    // Display all accounts
+    void displayAllAccounts() {
+        cout << "Bank Accounts: " << endl;
+        for (BankAccount* acc : accounts) {
+            acc->display();
+            cout << "------------------------" << endl;
+        }
+    }
+};
+
+int main() {
+    Bank bank;
+
+    int choice;
+    string fromAccNum, toAccNum;
+    double amount;
+
+    while (true) {
+        cout << "\nBank Management System" << endl;
+        cout << "1. Create Account" << endl;
+        cout << "2. Transfer Funds" << endl;
+        cout << "3. Display All Accounts" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                bank.createAccount();
+                break;
+            case 2:
+                cout << "Enter source account number: ";
+                cin >> fromAccNum;
+                cout << "Enter destination account number: ";
+                cin >> toAccNum;
+                cout << "Enter amount to transfer: ";
+                cin >> amount;
+                bank.transferFunds(fromAccNum, toAccNum, amount);
+                break;
+            case 3:
+                bank.displayAllAccounts();
+                break;
+            case 4:
+                cout << "Exiting..." << endl;
+                return 0;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
